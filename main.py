@@ -1,12 +1,12 @@
 from random import choice
 
-game_board_size = int(input('укажите размер стороны игровой доски:'))
-board = list(range(1, game_board_size**2 + 1))
-possible_moves = board.copy()
-players = ('player', 'computer')
-
 
 def draw_game_board(game_board_size: int) -> None:
+    """
+    Функция принимает на вход заданный размер доски и
+    отрисовывает её текущее состояние с учетом сделанных ходов.
+    """
+
     print(' ---' * game_board_size)
     for j in range(game_board_size):
         for i in range(game_board_size):
@@ -24,7 +24,12 @@ def draw_game_board(game_board_size: int) -> None:
     print(' ---' * game_board_size)
 
 
-def check_win(move=int, win_size=int) -> bool:
+def check_win(move: int) -> bool:
+    """
+    Функция принимает на вход сделанный ход и
+    проверяет, был ли он выигрышным.
+    """
+
     # определяем индексы столбца и строки хода
     if move % game_board_size != 0:
         col_ind = move % game_board_size - 1
@@ -32,40 +37,18 @@ def check_win(move=int, win_size=int) -> bool:
     else:
         col_ind = game_board_size - 1
         row_ind = move // game_board_size - 1
-    print(f'индекс столбца хода: {col_ind}')
-    print(f'индекс строки хода: {row_ind}')
 
-    # определяем левый индекс квадрата проверки выигрыша
+    # определяем левый индекс горизонтальной проверки выигрыша
     if (col_ind - win_size + 1) <= 0:
         left_ind = 0 + game_board_size * row_ind
-        print(f'левая граница квадрата проверки: {left_ind}')
     else:
         left_ind = col_ind - win_size + game_board_size * row_ind + 1
-        print(f'левая граница квадрата проверки: {left_ind}')
 
-    # определяем правый индекс квадрата проверки выигрыша
+    # определяем правый индекс горизонтальной проверки выигрыша
     if (game_board_size - (col_ind + win_size - 1)) <= 0:
         right_ind = game_board_size + game_board_size * row_ind - 1
-        print(f'правая граница квадрата проверки: {right_ind}')
     else:
         right_ind = col_ind + win_size + game_board_size * row_ind - 1
-        print(f'правая граница квадрата проверки: {right_ind}')
-
-    # определяем верхний индекс квадрата проверки выигрыша
-    if (row_ind - win_size + 1) <= 0:
-        top_ind = move - 1 - game_board_size * row_ind
-        print(f'верхняя граница квадрата проверки: {top_ind}')
-    else:
-        top_ind = move - 1 - game_board_size * (win_size - 1)
-        print(f'верхняя граница квадрата проверки: {top_ind}')
-
-    # определяем нижний индекс квадрата проверки выигрыша
-    if (game_board_size - (row_ind + win_size - 1)) <= 0:
-        down_ind = move - 1 + game_board_size * (game_board_size - row_ind - 1)
-        print(f'нижняя граница квадрата проверки: {down_ind}')
-    else:
-        down_ind = move - 1 + game_board_size * (win_size - 1)
-        print(f'нижняя граница квадрата проверки: {down_ind}')
 
     # проверка выигрыша по горизантали
     counter = 1
@@ -74,6 +57,18 @@ def check_win(move=int, win_size=int) -> bool:
             counter += 1
     if counter >= win_size:
         return True
+
+    # определяем верхний индекс вертикальной проверки выигрыша
+    if (row_ind - win_size + 1) <= 0:
+        top_ind = move - 1 - game_board_size * row_ind
+    else:
+        top_ind = move - 1 - game_board_size * (win_size - 1)
+
+    # определяем нижний индекс вертикальной проверки выигрыша
+    if (game_board_size - (row_ind + win_size - 1)) <= 0:
+        down_ind = move - 1 + game_board_size * (game_board_size - row_ind - 1)
+    else:
+        down_ind = move - 1 + game_board_size * (win_size - 1)
 
     # проверка выигрыша по вертикали
     counter = 1
@@ -84,13 +79,11 @@ def check_win(move=int, win_size=int) -> bool:
         return True
 
     # 1-я проверка по диагонали
-    for_start = min(right_ind + 1 - move, (move - 1 - top_ind)//game_board_size)
-    start = move - (game_board_size - 1) * (for_start) - 1
-    print(f'старт {start}')
+    start_i = min(right_ind + 1 - move, (move - 1 - top_ind)//game_board_size)
+    start = move - (game_board_size - 1) * start_i - 1
 
-    for_end = min(move-left_ind, (1 + (down_ind + 1 - move)//game_board_size))
-    end = move + (game_board_size - 1) * (for_end - 1) - 1
-    print(f'финиш {end}')
+    end_i = min(move - 1 - left_ind, (down_ind + 1 - move)//game_board_size)
+    end = move + (game_board_size - 1) * end_i - 1
 
     counter = 1
     for i in range(start + game_board_size - 1, end + 1, game_board_size - 1):
@@ -100,39 +93,73 @@ def check_win(move=int, win_size=int) -> bool:
         return True
 
     # 2-я проверка по диагонали
-    for_start = min(right_ind - move + 1, (1 + (down_ind + 1 - move)//game_board_size))
+    start_i = min(move - 1 - left_ind, (move - 1 - top_ind)//game_board_size)
+    start = move - (game_board_size + 1) * start_i - 1
 
-    start = move + (game_board_size + 1) * (for_start - 1)
+    end_i = min(right_ind + 1 - move, (down_ind + 1 - move)//game_board_size)
+    end = move + (game_board_size + 1) * end_i - 1
 
-    pass
+    counter = 1
+    for i in range(start + game_board_size + 1, end + 1, game_board_size + 1):
+        if board[i - game_board_size - 1] == board[i]:
+            counter += 1
+    if counter >= win_size:
+        return True
+    return False
 
 
-draw_game_board(game_board_size)
-check_win(44, 3)
-
-
-def main():
-    return
-    computer_move = choice(possible_moves)
-    first_step = choice(players)
+def main() -> None:
+    game_over = False
+    player_1 = True
+    current_player_comp = choice(players)
+    print('Первым ходит:', current_player_comp)
+    while not game_over:
+        draw_game_board(game_board_size)
+        if player_1:
+            mark = 'X'
+            if current_player_comp:
+                move = choice(possible_moves)
+                possible_moves.remove(move)
+                board[move-1] = mark
+                print(f'Компьютер сходил: {move}')
+                if len(possible_moves) == 0:
+                    print('Ничья')
+                    return
+            else:
+                move = int(input('Укажите доступную координату'))
+                possible_moves.remove(move)
+                board[move-1] = mark
+                if len(possible_moves) == 0:
+                    print('Ничья')
+                    return
+        else:
+            mark = 'O'
+            if current_player_comp:
+                move = choice(possible_moves)
+                possible_moves.remove(move)
+                board[move-1] = mark
+                print(f'Компьютер сходил: {move}')
+                if len(possible_moves) == 0:
+                    print('Ничья')
+                    return
+            else:
+                move = int(input('Укажите доступную координату'))
+                possible_moves.remove(move)
+                board[move-1] = mark
+                if len(possible_moves) == 0:
+                    print('Ничья')
+                    return
+        player_1 = not(player_1)
+        current_player_comp = not(current_player_comp)
+        game_over = check_win(move)
+    print(f'Конец игры: победили {mark}')
     draw_game_board(game_board_size)
-    print('Первым ходит:', first_step)
-    if first_step == 'computer':
-        computer_move = choice(possible_moves)
-        possible_moves.remove(computer_move)
-        board[computer_move-1] = 'X'
-        print(possible_moves)
-        draw_game_board(5)
-    else:
-        player_move = int(input('Введите координату:'))
-        possible_moves.remove(player_move)
-        board[player_move-1] = 'X'
-        print(possible_moves)
-        draw_game_board(5)
-
-
-main()
 
 
 if __name__ == '__main__':
-    pass
+    game_board_size = int(input('Укажите размер стороны игровой доски:'))
+    win_size = int(input('Сколько совпадений нужно для победы?'))
+    board = list(range(1, game_board_size**2 + 1))
+    possible_moves = board.copy()
+    players = (True, False)
+    main()
