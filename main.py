@@ -1,27 +1,35 @@
 from random import choice
 
 
-def draw_game_board(game_board_size: int) -> None:
+def draw_board_line(rownum: int) -> str:
+    line = []
+    for i in range(game_board_size):
+        current_coordinate = rownum * game_board_size + i
+        if board[current_coordinate] in ('X', 'O'):
+            line.append("|  ")
+        elif board[current_coordinate] < 10:
+            line.append("|  ")
+        elif board[current_coordinate] < 100:
+            line.append("| ")
+        elif board[current_coordinate] < 1000:
+            line.append("|")
+        line.append(str(board[current_coordinate]))
+    line.append("|")
+    return "".join(line)
+
+
+def draw_game_board(game_board_size: int) -> str:
     """
     Функция принимает на вход заданный размер доски и
     отрисовывает её текущее состояние с учетом сделанных ходов.
     """
-
-    print(' ---' * game_board_size)
-    for j in range(game_board_size):
-        for i in range(game_board_size):
-            current_coordinate = j * game_board_size + i
-            if board[current_coordinate] in ('X', 'O'):
-                print('|  ', end='')
-            elif board[current_coordinate] < 10:
-                print('|  ', end='')
-            elif board[current_coordinate] < 100:
-                print('| ', end='')
-            elif board[current_coordinate] < 1000:
-                print('|', end='')
-            print(board[current_coordinate], end='')
-        print('|')
-    print(' ---' * game_board_size)
+    
+    lines = []
+    lines.append(" ---" * game_board_size)
+    for rownum in range(game_board_size):
+        lines.append(draw_board_line(rownum))
+    lines.append(' ---' * game_board_size)
+    return "\n".join(lines)
 
 
 def check_win(move: int) -> bool:
@@ -114,7 +122,7 @@ def main() -> None:
     current_player_comp = choice(players)
     print('Первым ходит:', current_player_comp)
     while not game_over:
-        draw_game_board(game_board_size)
+        print(draw_game_board(game_board_size))
         if player_1:
             mark = 'X'
             if current_player_comp:
@@ -153,7 +161,7 @@ def main() -> None:
         current_player_comp = not(current_player_comp)
         game_over = check_win(move)
     print(f'Конец игры: победили {mark}')
-    draw_game_board(game_board_size)
+    print(draw_game_board(game_board_size))
 
 
 if __name__ == '__main__':
